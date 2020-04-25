@@ -86,6 +86,12 @@ The stack will always be maintained 16-byte aligned, except within the prolog (f
    * Help, use
 
 `.hh <command>`
+
+### Debug Strings
+We enable printing Debug Strings via command:
+`ed nt!Kd_Default_Mask 8`
+
+
 ### Symbols
    * Symbols, if available, are loaded when needed. To see what modules have symbols loaded, use
 
