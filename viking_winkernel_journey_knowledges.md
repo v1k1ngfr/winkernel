@@ -297,3 +297,18 @@ Having 3 windows :
    * Command
 
 Save the workspace (File→Save Workspace) after setting up the windows.
+
+## Windows Drivers
+[Link](https://docs.microsoft.com/en-us/windows-hardware/drivers/kernel/)
+
+### Overview of the Windows I/O Model
+The I/O manager presents a consistent interface to all kernel-mode drivers, including lowest-level, intermediate, and file system drivers. 
+
+All I/O requests to drivers are sent as I/O request packets (IRPs).
+
+### Summary
+The I/O manager creates a driver object for each driver that has been installed and loaded. Driver objects are defined using DRIVER_OBJECT structures.
+
+![Texte alternatif](https://docs.microsoft.com/en-us/windows-hardware/drivers/kernel/images/3devobj.png)
+
+When the I/O manager calls a driver's DriverEntry routine, it supplies the address of the driver's driver object. The driver object contains storage for entry points to many of a driver's standard routines. 
