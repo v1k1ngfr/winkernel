@@ -1,6 +1,7 @@
 # Table of Contents
 1. [Part 1 - setting up the lab](#lab_setup)
 2. [Part 2 - getting familiar with HackSys Extreme Vulnerable Driver](#hevd_intro)
+3. [Debugging without symbols (PEB)]()
 
 ** ############### **
 
@@ -69,7 +70,7 @@ After that, we can let the Debugee run further by executing the command:
 **On the Debugee:** We need to run DebugView as Administrator. Then we choose from the menu:
 
     Capture -> Capture Kernel
-
+<u></u>
 #### Installing the driver
 First, we will download the pre-build package (driver+exploit) on the Debugee (the victim machine), install them and test.
 We use OSLoader or the following commands :
@@ -102,6 +103,7 @@ Then we can load the "HEVD v3.00\driver\vulnerable\x64\HEVD.sys" which is signed
 
 #### Adding symbols
 The precompiled package of HEVD comes with symbols (sdb file) that we can also add to our Debugger. First, let’s stop the Debugee by sending it a break signal, and have a look at the HEVD module, we can set a filter:
+
 
     lm m HEV*
 
@@ -256,23 +258,206 @@ The values of the constants are defined in the header ([source code](https://raw
     #define HEVD_IOCTL_BUFFER_OVERFLOW_NON_PAGED_POOL                IOCTL(0x803)
     ...
 
-#### Writing a client application
+## Debugging without symbols
+In this chapter I will only use memory adresses, offset, etc to get information. So I will be able to debug without the PDB file. The main objective ? I want to set a breakpoint so I can debug this driver when the IOCTL (encapsulated in IRP) arrives to the I/O Manager.
+Some symbol information appears in the results below because I just want to verify this method is working as expected, but I don't use those symbols for debugging purpose.
 
-#### Debugging without symbols
+### List the HEVD module information
+First I want to know where (in memory) is loaded this driver : it starts at 0xfffff80245570000
+
+`kd> lm Dv m hevd`
+
+    Browse full module list
+    start             end                 module name
+    fffff802`45570000 fffff802`455fc000   HEVD       (deferred)             
+        Image path: HEVD.sys
+        Image name: HEVD.sys
+        Browse all global symbols  functions  data
+        Timestamp:        Tue Jul  2 14:18:56 2019 (5D1B4BB0)
+        CheckSum:         00012730
+        ImageSize:        0008C000
+        Translations:     0000.04b0 0000.04e4 0409.04b0 0409.04e4
+
+
+
+### List the HEVD driver object information
+Then I want to know where is stored the HEVD driver object : it can be reached at 0xffffe087d4d11b60
+
+`kd> !drvobj hevd` 
+
+    Driver object (ffffe087d4d11b60) is for:
+    *** Unable to resolve unqualified symbol in Bp expression 'Displaying '.
+     \Driver\HEVD
+    
+    Driver Extension List: (id , addr)
+    
+    Device Object list:
+    ffffe087d4df1b70 
+    
+
+I can get the device object information, so I can get 2 information :
+ * the Windows service name : HEVD
+ * the DeviceName (which is used by the client to interact with this driver) : HackSysExtremeVulnerableDriver
+
+`kd> !devobj ffffe087d4df1b70`
+
+     Device object (ffffe087d4df1b70) is for:
+     HackSysExtremeVulnerableDriver \Driver\HEVD DriverObject ffff978d2c0a42c0
+     
+
+### Find the DeviceIoControl handler
+I use the nt module and get some information stated below.
+
+`kd> dt nt!_DRIVER_OBJECT 0xffffe087d4d11b60`
+
+       +0x000 Type             : 0n4
+       +0x002 Size             : 0n336
+       +0x008 DeviceObject     : 0xffffe087`d4df1b70 _DEVICE_OBJECT
+       +0x010 Flags            : 0x12
+       +0x018 DriverStart      : 0xfffff802`45570000 Void
+       +0x020 DriverSize       : 0x8c000
+       +0x028 DriverSection    : 0xffffe087`d4c1b400 Void
+       +0x030 DriverExtension  : 0xffffe087`d4d11cb0 _DRIVER_EXTENSION
+       +0x038 DriverName       : _UNICODE_STRING "\Driver\HEVD"
+       +0x048 HardwareDatabase : 0xfffff802`483b08f8 _UNICODE_STRING "\REGISTRY\MACHINE\HARDWARE\DESCRIPTION\SYSTEM"
+       +0x050 FastIoDispatch   : (null) 
+       +0x058 DriverInit       : 0xfffff802`455fa134     long  HEVD!GsDriverEntry+0
+       +0x060 DriverStartIo    : (null) 
+       +0x068 DriverUnload     : 0xfffff802`455f5000     void  HEVD!DriverUnloadHandler+0
+       +0x070 MajorFunction    : [28] 0xfffff802`455f5058     long  HEVD!IrpCreateCloseHandler+0
+
+The source code of the driver is something like this :
+
+`DriverObject->MajorFunction[IRP_MJ_DEVICE_CONTROL] = IrpDeviceIoCtlHandler;`
+
+I just want to locate IrpDeviceIoCtlHandler in memory, in order to set a breakpoint.
+
+Here is a good method to get this information [Practical Malware Analysis - Chapter 10 - p218](https://nostarch.com/malware) (slightly modified because I'm on x64 architecture) :
+
+    The entry for MajorFunction in this structure is a pointer to the first entry
+    of the major function table. The major function table tells us what is exe-
+    cuted when the malicious driver is called from user space. The table has dif-
+    ferent functions at each index. Each index represents a different type of
+    request, and the indices are found in the file wdm.h and start with IRP_MJ_ .
+    For example, if we want to find out which offset in the table is called
+    when a user-space application calls DeviceIoControl , we would look for the
+    index of IRP_MJ_DEVICE_CONTROL . In this case, IRP_MJ_DEVICE_CONTROL has a value
+    of 0xe , and the major function table starts at an offset of 0x070 from the begin-
+    ning of the driver object. To find the function that will be called to handle
+    the DeviceIoControl request, use the command dd 0xffffe087d4d11b60+0x070+e*8 L1 .
+    
+    The 0x070 is the offset to the beginning of the table
+    0xe is the index of the IRP_MJ_DEVICE_CONTROL
+    and it’s multiplied by 8 because each pointer is 8 bytes (because the OS is 64 bits).
+    The L2 argument specifies that we want to see only two DWORD of output.
+
+I can confirm the values of IRP indexes by looking at the wdm.h file :
+[Link](https://github.com/Alexpux/mingw-w64/blob/master/mingw-w64-headers/ddk/include/ddk/wdm.h#L5477)
+
+    #define IRP_MJ_CREATE                     0x00
+    #define IRP_MJ_CREATE_NAMED_PIPE          0x01
+    #define IRP_MJ_CLOSE                      0x02
+    #define IRP_MJ_READ                       0x03
+    #define IRP_MJ_WRITE                      0x04
+    #define IRP_MJ_QUERY_INFORMATION          0x05
+    #define IRP_MJ_SET_INFORMATION            0x06
+    #define IRP_MJ_QUERY_EA                   0x07
+    #define IRP_MJ_SET_EA                     0x08
+    #define IRP_MJ_FLUSH_BUFFERS              0x09
+    #define IRP_MJ_QUERY_VOLUME_INFORMATION   0x0a
+    #define IRP_MJ_SET_VOLUME_INFORMATION     0x0b
+    #define IRP_MJ_DIRECTORY_CONTROL          0x0c
+    #define IRP_MJ_FILE_SYSTEM_CONTROL        0x0d
+    #define IRP_MJ_DEVICE_CONTROL             0x0e
+
+So I get the value 455f5078 which is a pointer to IrpDeviceIoCtlHandler :
+
+`kd> dd 0xffffe087d4d11b60+0x70+e*8 L2` 
+
+    ffffe087`d4d11c40  455f5078 fffff802
+
+I disassemble this memory space to ensure that I didn't make a miscalculation :
+
+`kd> u 0xfffff802455f5078 L5`
+
+    HEVD!IrpDeviceIoCtlHandler [c:\projects\hevd\driver\hevd\hacksysextremevulnerabledriver.c @ 259]:
+    fffff802`455f5078 488bc4          mov     rax,rsp
+    fffff802`455f507b 48895808        mov     qword ptr [rax+8],rbx
+    fffff802`455f507f 48896810        mov     qword ptr [rax+10h],rbp
+    fffff802`455f5083 48897018        mov     qword ptr [rax+18h],rsi
+    fffff802`455f5087 48897820        mov     qword ptr [rax+20h],rdi
+
+Now I can set a breakpoint on it.
+
+`kd> bp 0xfffff802455f5078`
+
+`kd> bl`
+
+     0 d Enable Clear  u                      0001 (0001) (Displaying )
+     1 e Disable Clear  fffff802`455f5078     0001 (0001) HEVD!IrpDeviceIoCtlHandler
+     2 e Disable Clear  fffff802`47bca1e0     0001 (0001) nt!DbgBreakPointWithStatus
+
+I tell to the debugee to continue execution and launch HackSysDriver exploit with -s (StackOverflow) -c cmd.exe options.
+
+`kd> g`
+
+The breakpoint is reached :-)
+
+    Breakpoint 1 hit
+    HEVD!IrpDeviceIoCtlHandler:
+    fffff802`455f5078 488bc4          mov     rax,rsp
+
+Here is a reminder of the IOCTL switch case.
+
+`kd> u fffff802455f5078 L10`
+
+    HEVD!IrpDeviceIoCtlHandler [c:\projects\hevd\driver\hevd\hacksysextremevulnerabledriver.c @ 259]:
+    fffff802`455f5078 488bc4          mov     rax,rsp
+    fffff802`455f507b 48895808        mov     qword ptr [rax+8],rbx
+    fffff802`455f507f 48896810        mov     qword ptr [rax+10h],rbp
+    fffff802`455f5083 48897018        mov     qword ptr [rax+18h],rsi
+    fffff802`455f5087 48897820        mov     qword ptr [rax+20h],rdi
+    fffff802`455f508b 4156            push    r14
+    fffff802`455f508d 4883ec20        sub     rsp,20h
+    fffff802`455f5091 4c8bb2b8000000  mov     r14,qword ptr [rdx+0B8h]
+    fffff802`455f5098 488bea          mov     rbp,rdx
+    fffff802`455f509b bebb0000c0      mov     esi,0C00000BBh
+    fffff802`455f50a0 4d85f6          test    r14,r14
+    fffff802`455f50a3 0f8472060000    je      HEVD!IrpDeviceIoCtlHandler+0x6a3 (fffff802`455f571b)
+    fffff802`455f50a9 458b4e18        mov     r9d,dword ptr [r14+18h]
+    fffff802`455f50ad b83b202200      mov     eax,22203Bh
+    fffff802`455f50b2 443bc8          cmp     r9d,eax
+    fffff802`455f50b5 0f8756030000    ja      HEVD!IrpDeviceIoCtlHandler+0x399 (fffff802`455f5411)
+
+I continue execution until the comparison : is my IOCTL = 22203B ?
+
+`kd> ta fffff802455f50b2`
+
+    HEVD!IrpDeviceIoCtlHandler+0x3:
+    fffff802`455f507b 48895808        mov     qword ptr [rax+8],rbx
+    [...]
+    fffff802`455f50b2 443bc8          cmp     r9d,eax
+
+Yes it is, look at the registers :
+
+`kd> r`
+
+    rax=000000000022203b rbx=ffffe087d2d03490 rcx=ffffe087d4df1b70
+    rdx=ffffe087d2d03490 rsi=00000000c00000bb rdi=ffffe087d70943b0
+    rip=fffff802455f50b2 rsp=fffff081c404c7f0 rbp=ffffe087d2d03490
+     r8=000000000000000e  r9=0000000000222003 r10=fffff802455f5078
+    r11=0000000000000000 r12=0000000000000000 r13=0000000000000000
+    r14=ffffe087d2d03560 r15=ffffe087d4df1b70
+    iopl=0         nv up ei ng nz na po nc
+    cs=0010  ss=0018  ds=002b  es=002b  fs=0053  gs=002b             efl=00000286
+    HEVD!IrpDeviceIoCtlHandler+0x3a:
+    fffff802`455f50b2 443bc8          cmp     r9d,eax
+
+
+
+
+
+
+## TODO
 https://docs.microsoft.com/en-us/windows-hardware/drivers/debugger/debugging-user-mode-processes-without-symbols
 Issue a k (Display Stack Backtrace) command on the symbol-less machine.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
