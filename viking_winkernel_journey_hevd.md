@@ -1,4 +1,4 @@
-# Table of Contents
+# Windows kernel journey - HEVD
 1. [Part 1 - setting up the lab](#lab_setup)
 2. [Part 2 - getting familiar with HackSys Extreme Vulnerable Driver](#hevd_intro)
 3. [Debugging without symbols (PEB)]()
