@@ -14,7 +14,7 @@
 
 ** ############### **
 
-##x64 software conventions
+## x64 software conventions
 [Link](https://docs.microsoft.com/en-us/cpp/build/x64-software-conventions?view=vs-2019)
 
 ### Scalar types
@@ -81,7 +81,7 @@ If the fixed allocation size is greater than or equal to one page of memory :
 
 The stack will always be maintained 16-byte aligned, except within the prolog (for example, after the return address is pushed), and except where indicated in Function Types for a certain class of frame functions.
 
-##Windbg skill
+## Windbg skill
 [Link](https://web.archive.org/web/20170907000441/http://expdev-kiuhnm.rhcloud.com/2015/05/17/windbg/)
 [Cheatsheet](https://github.com/hugsy/defcon_27_windbg_workshop/blob/master/windbg_cheatsheet.md)
 ### Help
@@ -330,7 +330,7 @@ The following example produces a full listing of all IRPs in the nonpaged pool:
 
 `kd> !irpfind` 
 
-##Windows Drivers
+## Windows Drivers
 [Link](https://docs.microsoft.com/en-us/windows-hardware/drivers/kernel/)
 
 ### Overview of the Windows I/O Model
