@@ -348,7 +348,7 @@ When the I/O manager calls a driver's DriverEntry routine, it supplies the addre
 ### I/O Requests
 [Link](https://docs.microsoft.com/en-us/windows-hardware/drivers/kernel/example-i-o-request---an-overview)
 
-##Process token stealing
+## Process token stealing
 ### Principles
 [Link](http://mcdermottcybersecurity.com/articles/x64-kernel-privilege-escalation)
 
