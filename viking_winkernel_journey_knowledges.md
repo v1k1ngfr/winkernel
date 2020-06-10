@@ -286,7 +286,9 @@ To search memory use the ‘s‘ command. Its format is:
 
 Example: searches for the two consecutive dwords 0xcc 0xcc in the memory interval [eip, eip + 1000*4 – 1].
 
-`s -d eip L?1000 cc cc`
+`s -d eip L?1000 cc cc
+
+s -a ffffc90afe191884 L180 "CC"`
 
 #### Pointers
 
