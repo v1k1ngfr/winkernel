@@ -1,0 +1,2 @@
+C:\Users\viking\Desktop\viking_drv2\x64\Debug\viking_drv2.sys
+C:\Users\viking\Desktop\viking_drv2\x64\Debug\viking_drv2.pdb
