@@ -1,0 +1,51 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30128.74
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "viking_driver1", "viking_driver1.vcxproj", "{21333582-CDB4-41F3-8EF3-5D55ED39793E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|ARM = Debug|ARM
+		Debug|ARM64 = Debug|ARM64
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|ARM = Release|ARM
+		Release|ARM64 = Release|ARM64
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{21333582-CDB4-41F3-8EF3-5D55ED39793E}.Debug|ARM.ActiveCfg = Debug|ARM
+		{21333582-CDB4-41F3-8EF3-5D55ED39793E}.Debug|ARM.Build.0 = Debug|ARM
+		{21333582-CDB4-41F3-8EF3-5D55ED39793E}.Debug|ARM.Deploy.0 = Debug|ARM
+		{21333582-CDB4-41F3-8EF3-5D55ED39793E}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{21333582-CDB4-41F3-8EF3-5D55ED39793E}.Debug|ARM64.Build.0 = Debug|ARM64
+		{21333582-CDB4-41F3-8EF3-5D55ED39793E}.Debug|ARM64.Deploy.0 = Debug|ARM64
+		{21333582-CDB4-41F3-8EF3-5D55ED39793E}.Debug|x64.ActiveCfg = Debug|x64
+		{21333582-CDB4-41F3-8EF3-5D55ED39793E}.Debug|x64.Build.0 = Debug|x64
+		{21333582-CDB4-41F3-8EF3-5D55ED39793E}.Debug|x64.Deploy.0 = Debug|x64
+		{21333582-CDB4-41F3-8EF3-5D55ED39793E}.Debug|x86.ActiveCfg = Debug|x64
+		{21333582-CDB4-41F3-8EF3-5D55ED39793E}.Debug|x86.Build.0 = Debug|x64
+		{21333582-CDB4-41F3-8EF3-5D55ED39793E}.Debug|x86.Deploy.0 = Debug|x64
+		{21333582-CDB4-41F3-8EF3-5D55ED39793E}.Release|ARM.ActiveCfg = Release|ARM
+		{21333582-CDB4-41F3-8EF3-5D55ED39793E}.Release|ARM.Build.0 = Release|ARM
+		{21333582-CDB4-41F3-8EF3-5D55ED39793E}.Release|ARM.Deploy.0 = Release|ARM
+		{21333582-CDB4-41F3-8EF3-5D55ED39793E}.Release|ARM64.ActiveCfg = Release|ARM64
+		{21333582-CDB4-41F3-8EF3-5D55ED39793E}.Release|ARM64.Build.0 = Release|ARM64
+		{21333582-CDB4-41F3-8EF3-5D55ED39793E}.Release|ARM64.Deploy.0 = Release|ARM64
+		{21333582-CDB4-41F3-8EF3-5D55ED39793E}.Release|x64.ActiveCfg = Release|x64
+		{21333582-CDB4-41F3-8EF3-5D55ED39793E}.Release|x64.Build.0 = Release|x64
+		{21333582-CDB4-41F3-8EF3-5D55ED39793E}.Release|x64.Deploy.0 = Release|x64
+		{21333582-CDB4-41F3-8EF3-5D55ED39793E}.Release|x86.ActiveCfg = Release|Win32
+		{21333582-CDB4-41F3-8EF3-5D55ED39793E}.Release|x86.Build.0 = Release|Win32
+		{21333582-CDB4-41F3-8EF3-5D55ED39793E}.Release|x86.Deploy.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {08893283-06DF-453B-B604-214D15D9662A}
+	EndGlobalSection
+EndGlobal

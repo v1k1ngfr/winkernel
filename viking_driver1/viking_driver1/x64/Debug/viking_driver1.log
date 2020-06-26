@@ -1,0 +1,8 @@
+﻿  Building 'viking_driver1' with toolset 'WindowsKernelModeDriver10.0' and the 'Desktop' target platform.
+  viking_drv.cpp
+  viking_driver1.vcxproj -> C:\Users\viking\Desktop\viking_driver1\viking_driver1\x64\Debug\viking_driver1.sys
+  Done Adding Additional Store
+  Successfully signed: C:\Users\viking\Desktop\viking_driver1\viking_driver1\x64\Debug\viking_driver1.sys
+  
+  Inf2Cat task was skipped as there were no inf files to process
+  

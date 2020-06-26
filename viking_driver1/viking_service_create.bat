@@ -1,0 +1,1 @@
+sc create viking type= kernel binpath= C:\Users\viking\Desktop\viking_driver1\viking_driver1\x64\Debug\viking_driver1.sys
