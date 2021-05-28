@@ -1,8 +1,14 @@
-# Windows kernel journey - knowledges
-1. [x64 software conventions](#x64-software-conventions)
-2. [Windbg skill](#windbg-skill)
-3. [Windows Drivers](#windows-drivers)
-4. [Process token stealing](#process-token-stealing)
+Getting started with Windows Kernel
+=============================
+
+- [x64 software conventions](#x64-software-conventions)
+- [Windbg skill](#windbg-skills)
+- [Windows Drivers](#windows-drivers)
+- [Process token stealing](#process-token-stealing)
+- [Driver Debug](#driver-debug)
+	- [FIND MAJOR FUNCTION](#find-major-function)
+
+----------------------------------
 
 ** ############### **
 
@@ -14,7 +20,7 @@
 
 ** ############### **
 
-## x64 software conventions
+# x64 software conventions
 [Link](https://docs.microsoft.com/en-us/cpp/build/x64-software-conventions?view=vs-2019)
 
 ### Scalar types
@@ -81,7 +87,7 @@ If the fixed allocation size is greater than or equal to one page of memory :
 
 The stack will always be maintained 16-byte aligned, except within the prolog (for example, after the return address is pushed), and except where indicated in Function Types for a certain class of frame functions.
 
-## Windbg skill
+# Windbg skills
 [Link](https://web.archive.org/web/20170907000441/http://expdev-kiuhnm.rhcloud.com/2015/05/17/windbg/)
 [Cheatsheet](https://github.com/hugsy/defcon_27_windbg_workshop/blob/master/windbg_cheatsheet.md)
 ### Help
@@ -89,10 +95,13 @@ The stack will always be maintained 16-byte aligned, except within the prolog (f
 
 `.hh <command>`
 
+### Get the kernel base address  
+
+`vertarget`
+
 ### Enable printing Debug Strings
 
 `ed nt!Kd_Default_Mask 8`
-
 
 ### Symbols
 
@@ -332,7 +341,7 @@ The following example produces a full listing of all IRPs in the nonpaged pool:
 
 `kd> !irpfind` 
 
-## Windows Drivers
+# Windows Drivers
 [Link](https://docs.microsoft.com/en-us/windows-hardware/drivers/kernel/)
 
 ### Overview of the Windows I/O Model
@@ -350,7 +359,7 @@ When the I/O manager calls a driver's DriverEntry routine, it supplies the addre
 ### I/O Requests
 [Link](https://docs.microsoft.com/en-us/windows-hardware/drivers/kernel/example-i-o-request---an-overview)
 
-## Process token stealing
+# Process token stealing
 ### Principles
 [Link](http://mcdermottcybersecurity.com/articles/x64-kernel-privilege-escalation)
 
@@ -649,3 +658,38 @@ _start:
     "\x48\x83\xC4\x40"                     # add rsp, 0x40 ; RESTORE (Specific to HEVD)
     "\x48\x31\xC0"                         # xor rax, rax
     "\xC3"                                 # ret
+
+# Driver Debug
+## FIND MAJOR FUNCTION
+
+`kd> !drvobj test`
+
+Driver object (ffff878f474d5e30) is for:
+ \Driver\test
+
+`kd> dd 0xffff878f474d5e30+0x70+e*8 L2`
+ffff878f474d5f10  64c01450 fffff802
+
+`kd> u 0xfffff80264c01450 L20`
+
+    test+0x1450:
+    fffff802`64c01450 4c8bdc          mov     r11,rsp
+    fffff802`64c01453 49895b18        mov     qword ptr [r11+18h],rbx
+    fffff802`64c01457 57              push    rdi
+    fffff802`64c01458 4883ec30        sub     rsp,30h
+    fffff802`64c0145c 4c8b82b8000000  mov     r8,qword ptr [rdx+0B8h]
+    fffff802`64c01463 488bda          mov     rbx,rdx
+    fffff802`64c01466 bfbb0000c0      mov     edi,0C00000BBh
+    fffff802`64c0146b 418b5018        mov     edx,dword ptr [r8+18h]
+    fffff802`64c0146f 8bc2            mov     eax,edx
+    fffff802`64c01471 4983631000      and     qword ptr [r11+10h],0
+    fffff802`64c01476 89542440        mov     dword ptr [rsp+40h],edx
+    fffff802`64c0147a 2d00202200      sub     eax,222000h                           # IOCTL NUMBER
+    fffff802`64c0147f 7457            je      test+0x14d8 (fffff802`64c014d8)  # FUNCTION_1
+    fffff802`64c01481 83e804          sub     eax,4
+    fffff802`64c01484 743f            je      test+0x14c5 (fffff802`64c014c5)  # FUNCTION_2
+    fffff802`64c01486 83f804          cmp     eax,4
+    fffff802`64c01489 7427            je      test+0x14b2 (fffff802`64c014b2)  # FUNCTION_3
+    fffff802`64c0148b 498d4308        lea     rax,[r11+8]
+    fffff802`64c0148f 448bc2          mov     r8d,edx
+    
