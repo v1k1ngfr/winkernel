@@ -36,6 +36,9 @@ Full variable content may look like this (downloaded symbols will be stored in C
 We need to enable Debugee to let it be controlled from outside. In order to do this, we are adding one more option in a boot menu.
 
     bcdedit /debug {current} on
+    bcdedit -set TESTSIGNING ON
+    bcdedit /set nointegritychecks on
+    bcdedit /dbgsettings serial debugport:1 baudrate:115200
 
 At the end we can see the settings where the debugging interface will be available:
 
@@ -90,16 +93,6 @@ We use OSLoader or the following commands :
 
     sc create hevd binpath="C:\hevd.sys" type=kernel
     net start hevd
-
-**64 bits**
-
-We have to disable security checks and signature verification.
-[Link](https://docs.microsoft.com/en-us/windows-hardware/drivers/install/the-testsigning-boot-configuration-option)
-
-    bcdedit.exe -set TESTSIGNING ON
-    bcdedit.exe /set nointegritychecks on
-
-Then we can load the "HEVD v3.00\driver\vulnerable\x64\HEVD.sys" which is signed.
 
 #### Adding symbols
 The precompiled package of HEVD comes with symbols (sdb file) that we can also add to our Debugger. First, let’s stop the Debugee by sending it a break signal, and have a look at the HEVD module, we can set a filter:
