@@ -91,6 +91,9 @@ Rename-Item -Path C:\tools\neo4j-community-4.0.0\ -NewName Neo4j
 #Invoke-WebRequest -Uri 'https://download.microsoft.com/download/E/E/D/EEDF18A8-4AED-4CE0-BEBE-70A83094FC5A/BuildTools_Full.exe' -OutFile "$Downloads\BuildTools.exe"
 #Enable-WindowsOptionalFeature -FeatureName NetFx3 -Online
 
+# https://docs.microsoft.com/en-us/windows-hardware/drivers/other-wdk-downloads
+Invoke-WebRequest -Uri 'https://go.microsoft.com/fwlink/?linkid=2128854' -OutFile "C:\Users\User\Desktop\wdksetup.exe"
+
 # GPRegistryPolicy
 Install-Module GPRegistryPolicy -Force
 
