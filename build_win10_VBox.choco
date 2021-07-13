@@ -8,6 +8,10 @@ New-Item -Path C:\ -Name tools -ItemType Directory -ErrorAction SilentlyContinue
 # UAC disable
 New-ItemProperty -Path HKLM:Software\Microsoft\Windows\CurrentVersion\policies\system -Name EnableLUA -PropertyType DWord -Value 0 -Force
 
+# Windows Update disable
+get-service -DisplayName "Windows Update" | Set-Service -StartupType "Disabled"
+stop-service -DisplayName "Windows Update"
+
 $env:TEMP = "C:\Temp"
 $env:TMP = "C:\Temp"
 
