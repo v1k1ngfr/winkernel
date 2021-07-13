@@ -42,10 +42,7 @@ choco install -y notepadplusplus.install
 choco install -y pebear 
 choco install -y processhacker 
 choco install -y python3 
-choco install -y vcredist-all 
 choco install -y vcredist140 
-#choco install -y visualstudio2019-workload-nativedesktop 
-choco install -y windows-sdk-10-version-2004-windbg 
 choco install -y x64dbg.portable 
 choco install -y nim
 choco install -y windowsdriverkit10
