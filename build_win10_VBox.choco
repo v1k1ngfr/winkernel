@@ -1,6 +1,12 @@
 # modified version of ZPS CRTO
+
+# directories creation
 New-Item -Path C:\ -Name Temp -ItemType Directory -ErrorAction SilentlyContinue
 New-Item -Path C:\ -Name payloads -ItemType Directory -ErrorAction SilentlyContinue
+New-Item -Path C:\ -Name tools -ItemType Directory -ErrorAction SilentlyContinue
+
+# UAC disable
+New-ItemProperty -Path HKLM:Software\Microsoft\Windows\CurrentVersion\policies\system -Name EnableLUA -PropertyType DWord -Value 0 -Force
 
 $env:TEMP = "C:\Temp"
 $env:TMP = "C:\Temp"
