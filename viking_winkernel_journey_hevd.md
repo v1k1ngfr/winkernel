@@ -65,6 +65,7 @@ HEVD and the dedicated exploits prints a lot of information as DebugStrings. We 
 **On the Debugger:** We need to break the execution of the Debugee in order to get the kd prompt (in WinDbg: Debug -> Break). Then, we enable printing Debug Strings via command:
 
     ed nt!Kd_Default_Mask 8
+    ed nt!Kd_STORMINIPORT_Mask 0
 
 After that, we can let the Debugee run further by executing the command:
 
